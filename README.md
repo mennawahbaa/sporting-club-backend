@@ -128,11 +128,16 @@ The `/sports` endpoint is optimized for mobile app usage with:
 ### Subscription Integrity
 - **Duplicate Prevention**: Members cannot have multiple subscriptions to the same sport
 - **Gender Validation**: Subscriptions respect sport gender restrictions
+- **Graceful Gender Updates**: When updating sport gender restrictions, existing subscriptions that violate the new rules are preserved (they must end naturally), but new subscriptions are prevented
 - **Type Management**: Clear distinction between group and private subscriptions
 
 ### Family Relationships
 - Members can have associated family members
-- Each family member is linked to exactly one central member
+- Each family member is linked to exactly one central member (familyHead)
+- **Smart Cascade Delete Operations**:
+  - **Root Member Deletion**: When deleting a member with no familyHead (root), all its children become independent roots (familyHead = null)
+  - **Member with Head & Children**: When deleting a member that has both a familyHead and children, all children are reassigned to the deleted member's familyHead
+- **Circular Dependency Prevention**: Family head updates are validated to prevent circular relationships
 - Cascade operations handle family relationship integrity
 
 ## 🧪 Testing
@@ -194,10 +199,35 @@ npm run start:prod
 ## 📝 Development Assumptions
 
 1. **Gender Restrictions**: Only "male", "female", and "mix" are valid sport gender restrictions
-2. **Family Relationships**: Family members are dependent on central members (cascade delete)
+2. **Family Relationships**: Family members are dependent on central members with intelligent cascade logic
 3. **Subscription Uniqueness**: Enforced at database level with unique constraints
 4. **Soft Delete**: Members are soft-deleted to maintain historical subscription data
 5. **Price Format**: Sport prices are stored as decimal values in the database
+
+## 🔄 Advanced Business Logic
+
+### Family Management Rules
+- **Root Member Deletion (No familyHead)**: 
+  - All children become independent root members
+  - Children's familyHead field is set to null
+  - No orphaned family members are created
+
+- **Member with Head & Children Deletion**:
+  - All children are reassigned to the deleted member's familyHead
+  - Maintains family hierarchy integrity
+  - Prevents broken family chains
+
+- **Family Head Updates**:
+  - Circular dependency validation prevents A → B → A relationships
+  - System validates the entire family tree before allowing updates
+  - Prevents infinite loops in family relationships
+
+### Sport Gender Management
+- **Gender Restriction Updates**:
+  - Existing subscriptions that violate new gender rules are NOT deleted
+  - Violating subscriptions are allowed to continue until they naturally end
+  - New subscriptions are prevented if they violate current gender restrictions
+  - This prevents data loss and maintains business continuity
 
 ## 🤝 Code Quality
 
