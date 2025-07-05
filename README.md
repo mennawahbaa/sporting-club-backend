@@ -25,7 +25,7 @@ This application provides a comprehensive API for managing:
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd blue-ribbon-sporting-club-api
+cd sporting-club-backend
 ```
 
 ### 2. Install Dependencies
@@ -81,7 +81,7 @@ The API will be available at `http://localhost:3000`
 |--------|----------|-------------|----------|
 | POST | `/sports` | Create a new sport | Validation, gender restrictions |
 | GET | `/sports` | Get all sports | **Optimized for mobile app** (cached, efficient) |
-| PUT | `/sports/:id` | Update a sport | Full sport information update |
+| PATCH | `/sports/:id` | Update a sport | Full sport information update |
 | DELETE | `/sports/:id` | Delete a sport | Cascade handling |
 
 ### 👥 Member Management
@@ -90,8 +90,8 @@ The API will be available at `http://localhost:3000`
 |--------|----------|-------------|----------|
 | POST | `/members` | Create a new member | Family relationship support |
 | GET | `/members/:id` | Get member details | Complete member profile |
-| PUT | `/members/:id` | Update member information | Personal data updates |
-| DELETE | `/members/:id` | Delete a member | Soft delete with relationship handling |
+| PATCH | `/members/:id` | Update member information | Personal data updates, family head reassignment with circular dependency prevention |
+| DELETE | `/members/:id` | Delete a member | Smart cascade delete: root members promote children to roots, members with head & children reassign children to grandparent |
 
 ### 🎯 Subscription Management
 
